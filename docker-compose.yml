@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: nas_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: nas_db
+      POSTGRES_USER: nas_user
+      POSTGRES_PASSWORD: nas_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nas_user -d nas_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: nas_ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  tika:
+    image: apache/tika:latest
+    container_name: nas_tika
+    restart: always
+    ports:
+      - "9998:9998"
+
+volumes:
+  postgres_data:
+  ollama_data:
