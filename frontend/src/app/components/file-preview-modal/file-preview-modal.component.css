@@ -1,3 +1,9 @@
+.modal-preview-box:not([open]) {
+  display: none !important;
+}
+.modal-preview-box[open] {
+  display: flex;
+}
 .modal-preview-box {
   padding: 1.5rem;
   width: 80vw;
@@ -7,7 +13,6 @@
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
   color: var(--text-main);
-  display: flex;
   flex-direction: column;
 }
 .modal-header {

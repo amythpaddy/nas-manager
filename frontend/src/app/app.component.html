@@ -17,6 +17,6 @@
   </div>
 
   <!-- Modals -->
-  <app-share-modal #shareModal [file]="selectedFileForShare"></app-share-modal>
-  <app-file-preview-modal #previewModal [file]="selectedFileForPreview"></app-file-preview-modal>
+  <app-share-modal #shareModal [file]="selectedFileForShare" (closed)="selectedFileForShare = null"></app-share-modal>
+  <app-file-preview-modal #previewModal [file]="selectedFileForPreview" (closed)="selectedFileForPreview = null"></app-file-preview-modal>
 </div>

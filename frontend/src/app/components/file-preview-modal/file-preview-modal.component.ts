@@ -29,6 +29,7 @@ export class FilePreviewModalComponent {
   close(): void {
     const dialog = document.getElementById('previewDialog') as HTMLDialogElement;
     if (dialog) dialog.close();
+    this.previewUrl.set('');
     this.closed.emit();
   }
 
