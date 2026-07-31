@@ -23,6 +23,10 @@
         <input type="file" (change)="onFileSelected($event)" style="display: none;" multiple>
       </label>
 
+      <button class="btn-secondary" (click)="reindexFolder()" [disabled]="files().length === 0" title="Re-index all files in this folder">
+        <i class="ri-refresh-line" [class.spin]="isProcessing()"></i> Re-index Folder
+      </button>
+
       <div class="view-toggle">
         <button [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')" title="Grid View">
           <i class="ri-grid-fill"></i>

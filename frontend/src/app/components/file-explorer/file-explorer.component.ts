@@ -125,6 +125,23 @@ export class FileExplorerComponent implements OnInit {
     this.fileService.downloadFile(fileId);
   }
 
+  reindexFolder(): void {
+    const folderId = this.currentFolderId();
+    this.fileService.reindexFolder(folderId).subscribe({
+      next: (updatedFiles) => {
+        this.files.set(updatedFiles);
+        setTimeout(() => this.loadContent(), 1000);
+      },
+      error: (err) => {
+        console.error('Failed to re-index folder:', err);
+      }
+    });
+  }
+
+  isProcessing(): boolean {
+    return this.files().some(file => file.status === 'PROCESSING');
+  }
+
   previewFile(file: FileItem): void {
     this.previewRequested.emit(file);
   }

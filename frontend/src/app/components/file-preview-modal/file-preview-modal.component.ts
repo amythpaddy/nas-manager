@@ -39,7 +39,12 @@ export class FilePreviewModalComponent {
   }
 
   isImage(): boolean {
-    return !!this.file?.mimeType.startsWith('image/');
+    if (!this.file) return false;
+    const name = this.file.name.toLowerCase();
+    const isRawExtension = name.endsWith('.cr2') || name.endsWith('.cr3') || name.endsWith('.arw') ||
+                           name.endsWith('.nef') || name.endsWith('.dng') || name.endsWith('.raf') ||
+                           name.endsWith('.orf') || name.endsWith('.rw2') || name.endsWith('.pef');
+    return this.file.mimeType.startsWith('image/') || isRawExtension;
   }
 
   isPdf(): boolean {

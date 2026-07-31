@@ -51,4 +51,12 @@ export class FileService {
   deleteFile(fileId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${fileId}`);
   }
+
+  reindexFolder(folderId?: string): Observable<FileItem[]> {
+    let params = new HttpParams();
+    if (folderId) {
+      params = params.set('folderId', folderId);
+    }
+    return this.http.post<FileItem[]>(`${this.apiUrl}/reindex`, null, { params });
+  }
 }

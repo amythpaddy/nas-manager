@@ -10,6 +10,7 @@ import com.nasmanager.repository.FileItemRepository;
 import com.nasmanager.repository.FolderRepository;
 import com.nasmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class FileService {
     private final LocalStorageService localStorageService;
     private final FileIngestionService fileIngestionService;
     private final FileEmbeddingRepository fileEmbeddingRepository;
+    private final RawImagePreviewService rawImagePreviewService;
 
     @Transactional
     public FileItemDto uploadFile(UUID userId, UUID folderId, MultipartFile file) {
@@ -144,6 +146,82 @@ public class FileService {
         userRepository.save(owner);
 
         fileItemRepository.delete(fileItem);
+    }
+
+    public PreviewResult getFilePreviewResource(UUID userId, UUID fileId) {
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        FileItem fileItem = fileItemRepository.findById(fileId)
+                .orElseThrow(() -> new IllegalArgumentException("File not found"));
+
+        // Check ownership or shared access
+        if (!fileItem.getOwner().getId().equals(userId)) {
+            throw new SecurityException("Access denied to requested file");
+        }
+
+        Path filePath = localStorageService.getFilePath(fileItem.getStoragePath());
+
+        // Extract raw image preview if it is a RAW image
+        if (rawImagePreviewService.isRawImage(fileItem.getName(), fileItem.getMimeType())) {
+            byte[] jpegBytes = rawImagePreviewService.extractPreviewJpeg(filePath);
+            if (jpegBytes != null && jpegBytes.length > 0) {
+                ByteArrayResource byteArrayResource = new ByteArrayResource(jpegBytes);
+                String previewFilename = fileItem.getName() + "_preview.jpg";
+                return new PreviewResult(byteArrayResource, "image/jpeg", previewFilename);
+            }
+        }
+
+        try {
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return new PreviewResult(resource, fileItem.getMimeType(), fileItem.getName());
+            } else {
+                throw new RuntimeException("Could not read file: " + fileItem.getName());
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error reading file path", e);
+        }
+    }
+
+    public static class PreviewResult {
+        private final Resource resource;
+        private final String mimeType;
+        private final String filename;
+
+        public PreviewResult(Resource resource, String mimeType, String filename) {
+            this.resource = resource;
+            this.mimeType = mimeType;
+            this.filename = filename;
+        }
+
+        public Resource getResource() { return resource; }
+        public String getMimeType() { return mimeType; }
+        public String getFilename() { return filename; }
+    }
+
+    @Transactional
+    public List<FileItemDto> reindexFolder(UUID userId, UUID folderId) {
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        List<FileItem> files;
+        if (folderId == null) {
+            files = fileItemRepository.findByOwnerAndFolderIsNull(owner);
+        } else {
+            // Verify folder exists and belongs to the user
+            Folder folder = folderRepository.findByIdAndOwner(folderId, owner)
+                    .orElseThrow(() -> new IllegalArgumentException("Folder not found or access denied"));
+            files = fileItemRepository.findByOwnerAndFolderId(owner, folderId);
+        }
+
+        for (FileItem fileItem : files) {
+            fileItem.setStatus(FileStatus.PROCESSING);
+            fileItemRepository.save(fileItem);
+            fileIngestionService.processAndIndexFile(fileItem);
+        }
+
+        return files.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
     public FileItemDto mapToDto(FileItem fileItem) {

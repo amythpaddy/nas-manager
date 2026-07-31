@@ -51,13 +51,12 @@ public class FileController {
     @GetMapping("/{fileId}/preview")
     public ResponseEntity<Resource> previewFile(@AuthenticationPrincipal UserPrincipal currentUser,
                                                 @PathVariable UUID fileId) {
-        Resource resource = fileService.getFileResource(currentUser.getId(), fileId);
-        FileItem fileEntity = fileService.getFileEntity(fileId);
+        FileService.PreviewResult previewResult = fileService.getFilePreviewResource(currentUser.getId(), fileId);
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(fileEntity.getMimeType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileEntity.getName() + "\"")
-                .body(resource);
+                .contentType(MediaType.parseMediaType(previewResult.getMimeType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + previewResult.getFilename() + "\"")
+                .body(previewResult.getResource());
     }
 
     @PatchMapping("/{fileId}/rename")
@@ -72,5 +71,11 @@ public class FileController {
                                            @PathVariable UUID fileId) {
         fileService.deleteFile(currentUser.getId(), fileId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reindex")
+    public ResponseEntity<List<FileItemDto>> reindexFolder(@AuthenticationPrincipal UserPrincipal currentUser,
+                                                           @RequestParam(required = false) UUID folderId) {
+        return ResponseEntity.ok(fileService.reindexFolder(currentUser.getId(), folderId));
     }
 }
