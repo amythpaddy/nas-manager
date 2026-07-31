@@ -59,4 +59,12 @@ export class FileService {
     }
     return this.http.post<FileItem[]>(`${this.apiUrl}/reindex`, null, { params });
   }
+
+  getFileTextContent(fileId: string): Observable<string> {
+    const token = localStorage.getItem('token');
+    return this.http.get(`${this.apiUrl}/${fileId}/preview`, {
+      params: new HttpParams().set('token', token || ''),
+      responseType: 'text'
+    });
+  }
 }

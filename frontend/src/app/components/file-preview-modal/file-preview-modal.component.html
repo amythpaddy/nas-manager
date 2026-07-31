@@ -21,11 +21,16 @@
 
     <!-- PDF Preview -->
     <div *ngIf="isPdf()" class="pdf-wrapper">
-      <iframe [src]="previewUrl()" class="pdf-frame"></iframe>
+      <iframe [src]="safePreviewUrl()" class="pdf-frame"></iframe>
+    </div>
+
+    <!-- Text Preview -->
+    <div *ngIf="isText()" class="text-wrapper">
+      <pre class="text-preview"><code>{{ textContent() }}</code></pre>
     </div>
 
     <!-- Generic / Text / Code Fallback -->
-    <div *ngIf="!isImage() && !isPdf()" class="fallback-wrapper">
+    <div *ngIf="!isImage() && !isPdf() && !isText()" class="fallback-wrapper">
       <div class="fallback-icon"><i class="ri-file-search-line"></i></div>
       <p>Preview rendering for <strong>{{ file.mimeType }}</strong></p>
       <button class="btn-primary" (click)="download()"><i class="ri-download-cloud-line"></i> Download File</button>
