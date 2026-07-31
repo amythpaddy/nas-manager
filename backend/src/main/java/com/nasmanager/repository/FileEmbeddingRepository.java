@@ -7,12 +7,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface FileEmbeddingRepository extends JpaRepository<FileEmbedding, UUID> {
-    void deleteByFileItem(FileItem fileItem);
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM FileEmbedding fe WHERE fe.fileItem = :fileItem")
+    void deleteByFileItem(@Param("fileItem") FileItem fileItem);
 
     // Similarity search via pgvector cosine distance: embedding <=> query_embedding
     @Query(value = """

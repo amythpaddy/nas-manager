@@ -23,47 +23,8 @@ import { FileItem } from './models/models';
     FilePreviewModalComponent,
     AuthComponent
   ],
-  template: `
-    <!-- Authentication Page View -->
-    <app-auth *ngIf="!isAuthenticated()"></app-auth>
-
-    <!-- Main Dashboard View -->
-    <div *ngIf="isAuthenticated()" class="app-layout">
-      <app-navbar (fileSelected)="onSearchResultSelected($event)"></app-navbar>
-
-      <div class="main-body">
-        <app-sidebar [activeTab]="activeTab" (tabChanged)="activeTab = $event"></app-sidebar>
-
-        <main class="content-area">
-          <app-file-explorer
-            (previewRequested)="openPreviewModal($event)"
-            (shareRequested)="openShareModal($event)"
-          ></app-file-explorer>
-        </main>
-      </div>
-
-      <!-- Modals -->
-      <app-share-modal #shareModal [file]="selectedFileForShare"></app-share-modal>
-      <app-file-preview-modal #previewModal [file]="selectedFileForPreview"></app-file-preview-modal>
-    </div>
-  `,
-  styles: [`
-    .app-layout {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      padding: 1rem 1.5rem;
-    }
-    .main-body {
-      display: flex;
-      gap: 1.5rem;
-      flex: 1;
-    }
-    .content-area {
-      flex: 1;
-      min-width: 0;
-    }
-  `]
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
 export class AppComponent {
   @ViewChild('shareModal') shareModal!: ShareModalComponent;
