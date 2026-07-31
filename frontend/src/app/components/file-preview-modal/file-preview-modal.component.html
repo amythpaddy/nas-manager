@@ -1,0 +1,34 @@
+<dialog id="previewDialog" class="glass-panel modal-preview-box">
+  <div class="modal-header">
+    <div class="title-wrapper">
+      <i class="ri-file-3-line"></i>
+      <span class="title-text">{{ file?.name }}</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary btn-sm" (click)="download()">
+        <i class="ri-download-line"></i>
+        <span class="btn-text"> Download</span>
+      </button>
+      <button class="close-btn" (click)="close()"><i class="ri-close-line"></i></button>
+    </div>
+  </div>
+
+  <div class="preview-body" *ngIf="file">
+    <!-- Image Preview -->
+    <div *ngIf="isImage()" class="image-wrapper">
+      <img [src]="previewUrl()" [alt]="file.name" class="img-preview">
+    </div>
+
+    <!-- PDF Preview -->
+    <div *ngIf="isPdf()" class="pdf-wrapper">
+      <iframe [src]="previewUrl()" class="pdf-frame"></iframe>
+    </div>
+
+    <!-- Generic / Text / Code Fallback -->
+    <div *ngIf="!isImage() && !isPdf()" class="fallback-wrapper">
+      <div class="fallback-icon"><i class="ri-file-search-line"></i></div>
+      <p>Preview rendering for <strong>{{ file.mimeType }}</strong></p>
+      <button class="btn-primary" (click)="download()"><i class="ri-download-cloud-line"></i> Download File</button>
+    </div>
+  </div>
+</dialog>

@@ -1,0 +1,41 @@
+<dialog id="shareDialog" class="glass-panel modal-box">
+  <div class="modal-header">
+    <h3><i class="ri-share-line"></i> Share File</h3>
+    <button class="close-btn" (click)="close()"><i class="ri-close-line"></i></button>
+  </div>
+
+  <div class="modal-body" *ngIf="file">
+    <div class="file-summary">
+      <i class="ri-file-3-fill file-icon"></i>
+      <div>
+        <div class="file-name">{{ file.name }}</div>
+        <div class="file-size">{{ formatBytes(file.sizeBytes) }}</div>
+      </div>
+    </div>
+
+    <!-- Share with specific user -->
+    <div class="share-section">
+      <label>Share with User</label>
+      <div class="input-with-btn">
+        <input type="text" class="input-glass" placeholder="Enter target username..." [(ngModel)]="targetUsername">
+        <button class="btn-secondary" (click)="grantUserShare()">Grant Access</button>
+      </div>
+    </div>
+
+    <!-- Public Link Generation -->
+    <div class="share-section mt-3">
+      <label>Public Share Link</label>
+      <div class="public-link-box" *ngIf="publicShareUrl()">
+        <input type="text" class="input-glass" [value]="publicShareUrl()" readonly>
+        <button class="btn-primary" (click)="copyLink()"><i class="ri-file-copy-line"></i> Copy</button>
+      </div>
+      <button *ngIf="!publicShareUrl()" class="btn-primary w-full" (click)="generatePublicLink()">
+        <i class="ri-link"></i> Generate Public Share Link
+      </button>
+    </div>
+
+    <div *ngIf="message()" class="status-msg">
+      <i class="ri-checkbox-circle-line"></i> {{ message() }}
+    </div>
+  </div>
+</dialog>

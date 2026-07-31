@@ -30,6 +30,7 @@ public class FileEmbedding {
 
     // Vector stored in pgvector format string representation: [0.1, 0.2, ...]
     @Column(name = "embedding", columnDefinition = "vector(768)")
+    @Convert(converter = PgVectorConverter.class)
     private String embedding;
 
     @Column(name = "created_at", nullable = false, updatable = false)

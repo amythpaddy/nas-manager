@@ -1,0 +1,165 @@
+<div class="explorer-container glass-panel">
+  <!-- Top Action Bar -->
+  <div class="explorer-toolbar">
+    <div class="breadcrumbs">
+      <button class="breadcrumb-item" (click)="navigateToRoot()">
+        <i class="ri-home-4-line"></i> Root
+      </button>
+      <ng-container *ngFor="let crumb of breadcrumbs(); let last = last">
+        <i class="ri-chevron-right-line separator"></i>
+        <button class="breadcrumb-item" [class.current]="last" (click)="navigateToFolder(crumb)">
+          {{ crumb.name }}
+        </button>
+      </ng-container>
+    </div>
+
+    <div class="toolbar-actions">
+      <button class="btn-secondary" (click)="openCreateFolderDialog()">
+        <i class="ri-folder-add-line"></i> New Folder
+      </button>
+
+      <label class="btn-primary file-upload-btn">
+        <i class="ri-upload-cloud-2-line"></i> Upload File
+        <input type="file" (change)="onFileSelected($event)" style="display: none;" multiple>
+      </label>
+
+      <div class="view-toggle">
+        <button [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')" title="Grid View">
+          <i class="ri-grid-fill"></i>
+        </button>
+        <button [class.active]="viewMode() === 'list'" (click)="viewMode.set('list')" title="List View">
+          <i class="ri-list-check"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drag & Drop Zone -->
+  <div 
+    class="drag-drop-overlay" 
+    [class.drag-over]="isDragging()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <!-- Content Loading Indicator -->
+    <div *ngIf="loading()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading files & folders...</p>
+    </div>
+
+    <div *ngIf="!loading() && folders().length === 0 && files().length === 0" class="empty-state">
+      <div class="empty-icon"><i class="ri-folder-open-line"></i></div>
+      <h3>This folder is empty</h3>
+      <p>Drag and drop files here or click Upload to get started.</p>
+    </div>
+
+    <!-- Grid View Mode -->
+    <div *ngIf="!loading() && viewMode() === 'grid'" class="items-grid">
+      <!-- Folders -->
+      <div class="grid-card folder-card" *ngFor="let folder of folders()" (click)="openFolder(folder)">
+        <div class="card-icon folder-color"><i class="ri-folder-3-fill"></i></div>
+        <div class="card-details">
+          <div class="card-title">{{ folder.name }}</div>
+          <div class="card-meta">Folder</div>
+        </div>
+        <button class="icon-btn delete-btn" (click)="$event.stopPropagation(); deleteFolder(folder.id)" title="Delete Folder">
+          <i class="ri-delete-bin-line"></i>
+        </button>
+      </div>
+
+      <!-- Files -->
+      <div class="grid-card file-card" *ngFor="let file of files()">
+        <div class="card-header">
+          <div class="card-icon file-color"><i class="ri-file-3-fill"></i></div>
+          <span class="badge" [ngClass]="{
+            'badge-indexed': file.status === 'INDEXED',
+            'badge-processing': file.status === 'PROCESSING',
+            'badge-error': file.status === 'ERROR'
+          }">
+            {{ file.status }}
+          </span>
+        </div>
+
+        <div class="card-details">
+          <div class="card-title" [title]="file.name">{{ file.name }}</div>
+          <div class="card-meta">{{ formatBytes(file.sizeBytes) }} • {{ file.mimeType.split('/')[1] || 'file' }}</div>
+        </div>
+
+        <div class="card-actions">
+          <button class="action-btn" (click)="previewFile(file)" title="Preview">
+            <i class="ri-eye-line"></i>
+          </button>
+          <button class="action-btn" (click)="downloadFile(file.id)" title="Download">
+            <i class="ri-download-line"></i>
+          </button>
+          <button class="action-btn" (click)="shareFile(file)" title="Share">
+            <i class="ri-share-line"></i>
+          </button>
+          <button class="action-btn danger" (click)="deleteFile(file.id)" title="Delete">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- List View Mode -->
+    <div *ngIf="!loading() && viewMode() === 'list'" class="items-list">
+      <table class="file-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Size</th>
+            <th>Owner</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let folder of folders()" class="folder-row" (click)="openFolder(folder)">
+            <td class="name-cell"><i class="ri-folder-3-fill folder-color"></i> {{ folder.name }}</td>
+            <td><span class="badge">Folder</span></td>
+            <td>--</td>
+            <td>{{ folder.ownerUsername }}</td>
+            <td>
+              <button class="icon-btn delete-btn" (click)="$event.stopPropagation(); deleteFolder(folder.id)"><i class="ri-delete-bin-line"></i></button>
+            </td>
+          </tr>
+
+          <tr *ngFor="let file of files()" class="file-row">
+            <td class="name-cell"><i class="ri-file-3-fill file-color"></i> {{ file.name }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-indexed': file.status === 'INDEXED',
+                'badge-processing': file.status === 'PROCESSING',
+                'badge-error': file.status === 'ERROR'
+              }">{{ file.status }}</span>
+            </td>
+            <td>{{ formatBytes(file.sizeBytes) }}</td>
+            <td>{{ file.ownerUsername }}</td>
+            <td class="actions-cell">
+              <button class="action-btn" (click)="previewFile(file)"><i class="ri-eye-line"></i></button>
+              <button class="action-btn" (click)="downloadFile(file.id)"><i class="ri-download-line"></i></button>
+              <button class="action-btn" (click)="shareFile(file)"><i class="ri-share-line"></i></button>
+              <button class="action-btn danger" (click)="deleteFile(file.id)"><i class="ri-delete-bin-line"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Create Folder Modal Dialog -->
+<dialog id="createFolderDialog" class="glass-panel modal-box">
+  <form method="dialog" (submit)="confirmCreateFolder()">
+    <h3>Create New Folder</h3>
+    <div class="form-group my-3">
+      <input type="text" class="input-glass" placeholder="Folder Name..." [(ngModel)]="newFolderName" name="folderName" required autofocus>
+    </div>
+    <div class="modal-buttons">
+      <button type="button" class="btn-secondary" (click)="closeCreateFolderDialog()">Cancel</button>
+      <button type="submit" class="btn-primary">Create</button>
+    </div>
+  </form>
+</dialog>

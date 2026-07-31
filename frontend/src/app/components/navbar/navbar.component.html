@@ -1,0 +1,69 @@
+<header class="navbar glass-panel">
+  <div class="nav-left">
+    <div class="brand">
+      <i class="ri-hard-drive-2-fill brand-icon"></i>
+      <span class="brand-title">Smart NAS</span>
+    </div>
+  </div>
+
+  <!-- Natural Language Semantic Vector Search -->
+  <div class="nav-search">
+    <div class="search-input-wrapper">
+      <i class="ri-sparkling-fill ai-sparkle"></i>
+      <input 
+        type="text" 
+        class="input-glass search-field" 
+        placeholder="Ask AI to find content inside files (e.g. 'quarterly financial report')..."
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="triggerSearch()"
+      >
+      <button class="search-btn" (click)="triggerSearch()">
+        <i class="ri-search-2-line"></i>
+      </button>
+    </div>
+
+    <!-- Quick AI Search Results Dropdown -->
+    <div class="search-results-dropdown glass-panel" *ngIf="showResults() && searchResults().length > 0">
+      <div class="dropdown-header">
+        <span><i class="ri-ai-generate"></i> Semantic Vector Search Results</span>
+        <button class="close-btn" (click)="showResults.set(false)"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="result-list">
+        <div class="result-item" *ngFor="let item of searchResults()" (click)="selectFile(item.fileId)">
+          <div class="result-icon"><i class="ri-file-text-line"></i></div>
+          <div class="result-info">
+            <div class="result-title">{{ item.fileName }}</div>
+            <div class="result-snippet">"...{{ item.matchedSnippet }}..."</div>
+          </div>
+          <div class="similarity-score">
+            {{ (item.similarityScore * 100).toFixed(0) }}% match
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <!-- Storage Quota Bar -->
+    <div class="storage-widget" *ngIf="user()">
+      <div class="storage-text">
+        <span>Storage</span>
+        <span class="quota-val">{{ formatBytes(user()?.storageUsedBytes || 0) }} / {{ formatBytes(user()?.storageQuotaBytes || 0) }}</span>
+      </div>
+      <div class="storage-bar">
+        <div class="storage-fill" [style.width.%]="getStoragePercentage()"></div>
+      </div>
+    </div>
+
+    <!-- User Profile Dropdown -->
+    <div class="user-profile" (click)="toggleMenu()">
+      <div class="avatar">{{ user()?.username?.charAt(0)?.toUpperCase() }}</div>
+      <span class="username">{{ user()?.username }}</span>
+      <i class="ri-arrow-down-s-line"></i>
+    </div>
+
+    <button class="btn-secondary logout-btn" (click)="logout()" title="Sign Out">
+      <i class="ri-logout-box-r-line"></i>
+    </button>
+  </div>
+</header>

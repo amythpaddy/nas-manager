@@ -1,0 +1,33 @@
+<aside class="sidebar glass-panel">
+  <div class="nav-group">
+    <div class="group-title">STORAGE MANAGER</div>
+    
+    <button 
+      class="nav-item" 
+      [class.active]="activeTab === 'my-files'"
+      (click)="selectTab('my-files')"
+    >
+      <i class="ri-folder-shared-line"></i>
+      <span>My Files</span>
+    </button>
+
+    <button 
+      class="nav-item" 
+      [class.active]="activeTab === 'shared'"
+      (click)="selectTab('shared')"
+    >
+      <i class="ri-share-forward-line"></i>
+      <span>Shared With Me</span>
+    </button>
+  </div>
+
+  <div class="nav-group mt-auto">
+    <div class="server-status-card">
+      <div class="status-indicator online"></div>
+      <div class="status-info">
+        <span class="status-title">NAS Server Online</span>
+        <span class="status-sub">PostgreSQL pgvector ready</span>
+      </div>
+    </div>
+  </div>
+</aside>
