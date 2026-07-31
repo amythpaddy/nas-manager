@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: nas-manager-backend
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nas_db}
+    username: ${DB_USER:nas_user}
+    password: ${DB_PASSWORD:nas_password}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  servlet:
+    multipart:
+      max-file-size: 2GB
+      max-request-size: 2GB
+
+nas:
+  storage:
+    root-directory: ${user.home}/.data/storage
+  jwt:
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    expiration-ms: 86400000 # 24 Hours
+    refresh-expiration-ms: 604800000 # 7 Days
+  ollama:
+    url: ${OLLAMA_URL:http://localhost:11434}
+    model: ${OLLAMA_MODEL:nomic-embed-text}
+
+server:
+  port: 8080
+  error:
+    include-message: always
